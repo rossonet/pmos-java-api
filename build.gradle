@@ -43,7 +43,7 @@ dependencies {
   api 'org.apache.axis2:axis2-transport-local:1.7.7'
   api 'org.apache.axis2:axis2-transport-http:1.7.7'
   api group: 'org.json', name: 'json', version: '20220924'
-  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
+  testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
   testImplementation group: 'com.ginsberg', name: 'junit5-system-exit', version: '1.1.2'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
