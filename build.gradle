@@ -16,7 +16,7 @@ group = 'net.rossonet.pmos'
 version = '0.0.1'
 
 ext {
-	sourceCompatibility = 1.8
+	//sourceCompatibility = 1.8
 	ossrhPassword = System.getenv('OSSRH_PASSWORD')
 }
 
