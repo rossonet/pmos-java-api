@@ -29,5 +29,9 @@ jobs:
     - name: Build and test with Gradle
       run: ./gradlew test -Dorg.gradle.daemon=false
       env:
-        NOT_USED: bla bla
+        PMOS_APP_ID: ${{ secrets.PMOS_APP_ID }}
+        PMOS_APP_SECRET: ${{ secrets.PMOS_APP_SECRET }}
+        PMOS_ENDPOINT: https://processi.bottegaio.net
+        PMOS_PASSWORD: ${{ secrets.PMOS_PASSWORD }}
+        PMOS_USERNAME: test
 
