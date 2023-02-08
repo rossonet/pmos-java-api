@@ -1,5 +1,6 @@
 package net.rossonet.pmos.client3;
 
+import org.jdom2.Document;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -219,6 +220,8 @@ public interface PmosClient3 extends AutoCloseable {
 	JSONArray getDynaforms(String projectUid) throws ProcessMakerClient3Exception;
 
 	String getProcessAsXml(String projectUid) throws ProcessMakerClient3Exception;
+
+	Document getProcessAsXmlDocument(String projectUid) throws ProcessMakerClient3Exception;
 
 	String getServerBaseUrl();
 

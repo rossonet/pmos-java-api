@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.logging.Logger;
 
+import org.jdom2.Element;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
@@ -42,6 +43,17 @@ public class MainTest {
 		logger.info("test completed");
 	}
 
+	private PmosClient3 connect() throws ProcessMakerClient3Exception {
+		final String endpoint = System.getenv("PMOS_ENDPOINT");
+		final String username = System.getenv("PMOS_USERNAME");
+		System.out.println("try username " + username + " at " + endpoint);
+		final PmosClient3 client = PmosClient3.getNewClient(endpoint, "demo", username, System.getenv("PMOS_PASSWORD"));
+		client.connect();
+		assertNotNull(client.getSessionId());
+		System.out.println("sessionId => " + client.getSessionId());
+		return client;
+	}
+
 	@Test
 	@Order(1)
 	public void createClient() throws Exception {
@@ -60,6 +72,9 @@ public class MainTest {
 			System.out.println("+++++++++++++++++++++++++++++++++++++++");
 			System.out.println(p.getGuid() + " -> " + p.getName());
 			System.out.println(client.getProcessAsXml(p.getGuid()));
+			for (final Element c : client.getProcessAsXmlDocument(p.getGuid()).getRootElement().getChildren()) {
+				System.out.println(c.getName() + " -> " + c.getValue());
+			}
 		}
 		client.disconnect();
 	}
@@ -120,17 +135,6 @@ public class MainTest {
 		}
 		assertTrue(c > 5);
 		client.disconnect();
-	}
-
-	private PmosClient3 connect() throws ProcessMakerClient3Exception {
-		final String endpoint = System.getenv("PMOS_ENDPOINT");
-		final String username = System.getenv("PMOS_USERNAME");
-		System.out.println("try username " + username + " at " + endpoint);
-		final PmosClient3 client = PmosClient3.getNewClient(endpoint, "demo", username, System.getenv("PMOS_PASSWORD"));
-		client.connect();
-		assertNotNull(client.getSessionId());
-		System.out.println("sessionId => " + client.getSessionId());
-		return client;
 	}
 
 }

@@ -1,11 +1,15 @@
 package net.rossonet.pmos.client3;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.logging.Logger;
 
 import org.apache.axis2.AxisFault;
 import org.apache.http.ParseException;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.rossonet.utils.LogHelper;
@@ -153,6 +157,18 @@ public class ProcessMakerClient3 implements PmosClient3 {
 		checkClient();
 		caseListRequest.setSessionId(sessionId);
 		return client.caseList(caseListRequest);
+	}
+
+	private void checkClient() throws RemoteException {
+		if (client == null || sessionId == null) {
+			throw new RemoteException("client disconnected");
+		}
+	}
+
+	private void checkRestClient() throws RemoteException {
+		if (processMakerRestClient == null || !processMakerRestClient.isValid()) {
+			throw new RemoteException("rest client disconnected");
+		}
 	}
 
 	@Override
@@ -313,6 +329,18 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
+	public Document getProcessAsXmlDocument(final String projectUid) throws ProcessMakerClient3Exception {
+		try {
+			// checkRestClient();
+			final SAXBuilder sax = new SAXBuilder();
+			return sax.build(new ByteArrayInputStream(getProcessAsXml(projectUid).getBytes()));
+		} catch (ParseException | IOException | JDOMException e) {
+			logger.severe(LogHelper.stackTraceToString(e));
+			throw new ProcessMakerClient3Exception(e);
+		}
+	}
+
+	@Override
 	public String getServerBaseUrl() {
 		return serverBaseUrl;
 	}
@@ -380,6 +408,10 @@ public class ProcessMakerClient3 implements PmosClient3 {
 		checkClient();
 		inputDocumentProcessListRequest.setSessionId(sessionId);
 		return client.inputDocumentProcessList(inputDocumentProcessListRequest);
+	}
+
+	private LoginResponse login(final Login login) throws RemoteException {
+		return client.login(login);
 	}
 
 	@Override
@@ -518,22 +550,6 @@ public class ProcessMakerClient3 implements PmosClient3 {
 		checkClient();
 		userListRequest.setSessionId(sessionId);
 		return client.userList(userListRequest);
-	}
-
-	private void checkClient() throws RemoteException {
-		if (client == null || sessionId == null) {
-			throw new RemoteException("client disconnected");
-		}
-	}
-
-	private void checkRestClient() throws RemoteException {
-		if (processMakerRestClient == null || !processMakerRestClient.isValid()) {
-			throw new RemoteException("rest client disconnected");
-		}
-	}
-
-	private LoginResponse login(final Login login) throws RemoteException {
-		return client.login(login);
 	}
 
 }
