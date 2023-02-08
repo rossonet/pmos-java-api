@@ -1,6 +1,6 @@
 # ProcessMaker Java client library
 
-[![Test on master branch with Gradle](https://github.com/rossonet/pmos-java-api/actions/workflows/test-on-master-with-gradle.yml/badge.svg)](https://github.com/rossonet/pmos-java-api/actions/workflows/test-on-master-with-gradle.yml)
+[![Test on main branch with Gradle](https://github.com/rossonet/pmos-java-api/actions/workflows/test-on-main-with-gradle.yml/badge.svg)](https://github.com/rossonet/pmos-java-api/actions/workflows/test-on-main-with-gradle.yml)
 
 
 

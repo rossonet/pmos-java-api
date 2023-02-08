@@ -1,4 +1,4 @@
-name: Test on master branch with Gradle
+name: Test on main branch with Gradle
 
 on:
   push:
