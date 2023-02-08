@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.logging.Logger;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
@@ -20,32 +22,66 @@ import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.ProcessListRe
 import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.ProcessListStruct;
 import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UserListRequest;
 import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UserListStruct;
+import net.rossonet.pmos.client3.rest.ProcessMakerRestClient.AccessScope;
 
 @TestMethodOrder(OrderAnnotation.class)
 public class MainTest {
 
 	private static final Logger logger = Logger.getLogger(MainTest.class.getName());
 
+	@Test
+	@Order(4)
+	public void checkRestClient() throws Exception {
+		final PmosClient3 client = connect();
+		client.connectRestApi(System.getenv("PMOS_APP_ID"), System.getenv("PMOS_APP_SECRET"), AccessScope.ALL);
+		client.disconnect();
+	}
+
 	@AfterEach
 	public void cleanTestsContext() throws Exception {
 		logger.info("test completed");
-	}
-
-	private PmosClient3 connect() throws ProcessMakerClient3Exception {
-		final String endpoint = System.getenv("PMOS_ENDPOINT");
-		final PmosClient3 client = PmosClient3.getNewClient(endpoint, "demo");
-		final String username = System.getenv("PMOS_USERNAME");
-		System.out.println("try username " + username + " at " + endpoint);
-		client.connect(username, System.getenv("PMOS_PASSWORD"));
-		assertNotNull(client.getSessionId());
-		System.out.println("sessionId => " + client.getSessionId());
-		return client;
 	}
 
 	@Test
 	@Order(1)
 	public void createClient() throws Exception {
 		final PmosClient3 client = connect();
+		client.disconnect();
+	}
+
+	@Test
+	@Order(5)
+	public void downloadXmlProcess() throws Exception {
+		final PmosClient3 client = connect();
+		client.connectRestApi(System.getenv("PMOS_APP_ID"), System.getenv("PMOS_APP_SECRET"), AccessScope.ALL);
+		final ProcessListRequest processListRequest = new ProcessListRequest();
+		final ProcessListStruct[] processList = client.processList(processListRequest).getProcesses();
+		for (final ProcessListStruct p : processList) {
+			System.out.println("+++++++++++++++++++++++++++++++++++++++");
+			System.out.println(p.getGuid() + " -> " + p.getName());
+			System.out.println(client.getProcessAsXml(p.getGuid()));
+		}
+		client.disconnect();
+	}
+
+	@Test
+	@Order(6)
+	public void getDynaforms() throws Exception {
+		final PmosClient3 client = connect();
+		client.connectRestApi(System.getenv("PMOS_APP_ID"), System.getenv("PMOS_APP_SECRET"), AccessScope.ALL);
+		final ProcessListRequest processListRequest = new ProcessListRequest();
+		final ProcessListStruct[] processList = client.processList(processListRequest).getProcesses();
+		for (final ProcessListStruct p : processList) {
+			System.out.println("---------------------");
+			System.out.println(p.getGuid() + " -> " + p.getName());
+			final JSONArray dynaforms = client.getDynaforms(p.getGuid());
+			System.out.println(dynaforms.toString(2));
+			for (int n = 0; n < dynaforms.length(); n++) {
+				final String dynUid = dynaforms.getJSONObject(n).getString("dyn_uid");
+				final JSONObject dynaform = client.getDynaform(p.getGuid(), dynUid);
+				System.out.println(dynaform.toString(2));
+			}
+		}
 		client.disconnect();
 	}
 
@@ -84,6 +120,17 @@ public class MainTest {
 		}
 		assertTrue(c > 5);
 		client.disconnect();
+	}
+
+	private PmosClient3 connect() throws ProcessMakerClient3Exception {
+		final String endpoint = System.getenv("PMOS_ENDPOINT");
+		final String username = System.getenv("PMOS_USERNAME");
+		System.out.println("try username " + username + " at " + endpoint);
+		final PmosClient3 client = PmosClient3.getNewClient(endpoint, "demo", username, System.getenv("PMOS_PASSWORD"));
+		client.connect();
+		assertNotNull(client.getSessionId());
+		System.out.println("sessionId => " + client.getSessionId());
+		return client;
 	}
 
 }

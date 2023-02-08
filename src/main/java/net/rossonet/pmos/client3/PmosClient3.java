@@ -1,17 +1,23 @@
 package net.rossonet.pmos.client3;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import net.rossonet.pmos.client3.rest.ProcessMakerRestClient.AccessScope;
+
 public interface PmosClient3 extends AutoCloseable {
 
-	public static PmosClient3 getNewClient(String serverBaseUrl, String workspace) {
-		return new ProcessMakerClient3(serverBaseUrl, workspace);
+	public static PmosClient3 getNewClient(final String serverBaseUrl, final String workspace, final String username,
+			final String password) {
+		return new ProcessMakerClient3(serverBaseUrl, workspace, username, password);
 	}
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#addCaseNote
 	 * @param addCaseNoteRequest40
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.AddCaseNoteResponse addCaseNote(
@@ -22,10 +28,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#assignUserToDepartment
 	 * @param assignUserToDepartmentRequest48
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.PmResponse assignUserToDepartment(
@@ -36,10 +42,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#assignUserToGroup
 	 * @param assignUserToGroupRequest44
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.PmResponse assignUserToGroup(
@@ -50,10 +56,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#cancelCase
 	 * @param cancelCaseRequest56
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.CancelCaseResponse cancelCase(
@@ -64,10 +70,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#caseList
 	 * @param caseListRequest28
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.CaseListResponse caseList(
@@ -78,10 +84,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#claimCase
 	 * @param claimCaseRequest42
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.ClaimCaseResponse claimCase(
@@ -90,14 +96,16 @@ public interface PmosClient3 extends AutoCloseable {
 
 			throws java.rmi.RemoteException;
 
-	void connect(String username, String password) throws ProcessMakerClient3Exception;
+	void connect() throws ProcessMakerClient3Exception;
+
+	void connectRestApi(String applicationId, String applicationSecret, AccessScope scope);
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#createDepartment
 	 * @param createDepartmentRequest38
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.CreateDepartmentResponse createDepartment(
@@ -108,10 +116,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#createGroup
 	 * @param createGroupRequest10
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.CreateGroupResponse createGroup(
@@ -122,10 +130,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#createUser
 	 * @param createUserRequest50
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.CreateUserResponse createUser(
@@ -136,10 +144,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#deleteCase
 	 * @param deleteCaseRequest86
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.DeleteCaseResponse deleteCase(
@@ -150,10 +158,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#departmentList
 	 * @param departmentListRequest68
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.DepartmentListResponse departmentList(
@@ -166,10 +174,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#executeTrigger
 	 * @param executeTriggerRequest20
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.PmResponse executeTrigger(
@@ -180,10 +188,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#getCaseInfo
 	 * @param getCaseInfoRequest32
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.GetCaseInfoResponse getCaseInfo(
@@ -194,10 +202,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#getCaseNotes
 	 * @param getCaseNotesRequest54
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.GetCaseNotesResponse getCaseNotes(
@@ -206,16 +214,24 @@ public interface PmosClient3 extends AutoCloseable {
 
 			throws java.rmi.RemoteException;
 
+	JSONObject getDynaform(String projectUid, String dynaformUid) throws ProcessMakerClient3Exception;
+
+	JSONArray getDynaforms(String projectUid) throws ProcessMakerClient3Exception;
+
+	String getProcessAsXml(String projectUid) throws ProcessMakerClient3Exception;
+
 	String getServerBaseUrl();
 
 	String getSessionId();
 
+	String getUsername();
+
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#getVariables
 	 * @param getVariablesRequest60
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.GetVariablesResponse getVariables(
@@ -226,10 +242,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#getVariablesNames
 	 * @param getVariablesNamesRequest46
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.GetVariablesNamesResponse getVariablesNames(
@@ -242,10 +258,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#groupList
 	 * @param groupListRequest22
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.GroupListResponse groupList(
@@ -256,10 +272,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#informationUser
 	 * @param informationUserRequest52
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.InformationUserResponse informationUser(
@@ -270,10 +286,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#inputDocumentList
 	 * @param inputDocumentListRequest70
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.InputDocumentListResponse inputDocumentList(
@@ -284,10 +300,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#inputDocumentProcessList
 	 * @param inputDocumentProcessListRequest16
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.InputDocumentProcessListResponse inputDocumentProcessList(
@@ -298,10 +314,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#newCase
 	 * @param newCaseRequest58
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.NewCaseResponse newCase(
@@ -312,10 +328,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#newCaseImpersonate
 	 * @param newCaseImpersonateRequest18
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.NewCaseImpersonateResponse newCaseImpersonate(
@@ -326,10 +342,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#outputDocumentList
 	 * @param outputDocumentListRequest78
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.OutputDocumentListResponse outputDocumentList(
@@ -340,10 +356,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#pauseCase
 	 * @param pauseCaseRequest34
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.PauseCaseResponse pauseCase(
@@ -354,10 +370,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#processList
 	 * @param processListRequest8
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.ProcessListResponse processList(
@@ -368,10 +384,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#reassignCase
 	 * @param reassignCaseRequest84
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.PmResponse reassignCase(
@@ -382,10 +398,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#removeDocument
 	 * @param removeDocumentRequest26
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.RemoveDocumentResponse removeDocument(
@@ -396,10 +412,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#removeUserFromGroup
 	 * @param removeUserFromGroupRequest64
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.PmResponse removeUserFromGroup(
@@ -410,10 +426,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#roleList
 	 * @param roleListRequest24
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.RoleListResponse roleList(
@@ -424,10 +440,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#routeCase
 	 * @param routeCaseRequest30
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.RouteCaseResponse routeCase(
@@ -438,10 +454,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#sendMessage
 	 * @param sendMessageRequest14
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.PmResponse sendMessage(
@@ -458,10 +474,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#taskCase
 	 * @param taskCaseRequest72
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.TaskCaseResponse taskCase(
@@ -472,10 +488,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#taskList
 	 * @param taskListRequest62
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.TaskListResponse taskList(
@@ -486,10 +502,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#triggerList
 	 * @param triggerListRequest76
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.TriggerListResponse triggerList(
@@ -500,10 +516,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#unassignedCaseList
 	 * @param unassignedCaseListRequest82
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UnassignedCaseListResponse unassignedCaseList(
@@ -514,10 +530,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#unpauseCase
 	 * @param unpauseCaseRequest36
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UnpauseCaseResponse unpauseCase(
@@ -528,10 +544,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#updateUser
 	 * @param updateUserRequest12
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UpdateUserResponse updateUser(
@@ -542,10 +558,10 @@ public interface PmosClient3 extends AutoCloseable {
 
 	/**
 	 * Auto generated method signature
-	 * 
+	 *
 	 * @see net.rossonet.pmos.client3.generated.ProcessMakerService#userList
 	 * @param userListRequest74
-	 * 
+	 *
 	 */
 
 	net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UserListResponse userList(

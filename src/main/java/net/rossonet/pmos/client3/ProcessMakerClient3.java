@@ -1,9 +1,13 @@
 package net.rossonet.pmos.client3;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.logging.Logger;
 
 import org.apache.axis2.AxisFault;
+import org.apache.http.ParseException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.rossonet.utils.LogHelper;
 
 import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub;
@@ -81,6 +85,8 @@ import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UpdateUserReq
 import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UpdateUserResponse;
 import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UserListRequest;
 import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UserListResponse;
+import net.rossonet.pmos.client3.rest.ProcessMakerRestClient;
+import net.rossonet.pmos.client3.rest.ProcessMakerRestClient.AccessScope;
 
 /**
  * documention: https://wiki.processmaker.com/3.3/ProcessMaker_WSDL_Web_Services
@@ -92,27 +98,35 @@ import net.rossonet.pmos.client3.generated.ProcessMakerServiceStub.UserListRespo
 public class ProcessMakerClient3 implements PmosClient3 {
 	private static final Logger logger = Logger.getLogger(ProcessMakerClient3.class.getName());
 	private ProcessMakerServiceStub client = null;
-	private final String soapEndpoint;
-	private String sessionId = null;
-	private final String workspace;
-
+	private final String password;
+	private ProcessMakerRestClient processMakerRestClient = null;
 	private final String serverBaseUrl;
 
-	ProcessMakerClient3(String serverBaseUrl, String workspace) {
+	private String sessionId = null;
+
+	private final String soapEndpoint;
+	private final String username;
+
+	private final String workspace;
+
+	ProcessMakerClient3(final String serverBaseUrl, final String workspace, final String username,
+			final String password) {
+		this.username = username;
+		this.password = password;
 		this.workspace = workspace;
 		this.serverBaseUrl = serverBaseUrl;
 		this.soapEndpoint = serverBaseUrl + "/sys" + workspace + "/en/neoclassic/services/soap2";
 	}
 
 	@Override
-	public AddCaseNoteResponse addCaseNote(AddCaseNoteRequest addCaseNoteRequest) throws RemoteException {
+	public AddCaseNoteResponse addCaseNote(final AddCaseNoteRequest addCaseNoteRequest) throws RemoteException {
 		checkClient();
 		addCaseNoteRequest.setSessionId(sessionId);
 		return client.addCaseNote(addCaseNoteRequest);
 	}
 
 	@Override
-	public PmResponse assignUserToDepartment(AssignUserToDepartmentRequest assignUserToDepartmentRequest)
+	public PmResponse assignUserToDepartment(final AssignUserToDepartmentRequest assignUserToDepartmentRequest)
 			throws RemoteException {
 		checkClient();
 		assignUserToDepartmentRequest.setSessionId(sessionId);
@@ -120,34 +134,29 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public PmResponse assignUserToGroup(AssignUserToGroupRequest assignUserToGroupRequest) throws RemoteException {
+	public PmResponse assignUserToGroup(final AssignUserToGroupRequest assignUserToGroupRequest)
+			throws RemoteException {
 		checkClient();
 		assignUserToGroupRequest.setSessionId(sessionId);
 		return client.assignUserToGroup(assignUserToGroupRequest);
 	}
 
 	@Override
-	public CancelCaseResponse cancelCase(CancelCaseRequest cancelCaseRequest) throws RemoteException {
+	public CancelCaseResponse cancelCase(final CancelCaseRequest cancelCaseRequest) throws RemoteException {
 		checkClient();
 		cancelCaseRequest.setSessionId(sessionId);
 		return client.cancelCase(cancelCaseRequest);
 	}
 
 	@Override
-	public CaseListResponse caseList(CaseListRequest caseListRequest) throws RemoteException {
+	public CaseListResponse caseList(final CaseListRequest caseListRequest) throws RemoteException {
 		checkClient();
 		caseListRequest.setSessionId(sessionId);
 		return client.caseList(caseListRequest);
 	}
 
-	private void checkClient() throws RemoteException {
-		if (client == null || sessionId == null) {
-			throw new RemoteException("client disconnected");
-		}
-	}
-
 	@Override
-	public ClaimCaseResponse claimCase(ClaimCaseRequest claimCaseRequest) throws RemoteException {
+	public ClaimCaseResponse claimCase(final ClaimCaseRequest claimCaseRequest) throws RemoteException {
 		checkClient();
 		claimCaseRequest.setSessionId(sessionId);
 		return client.claimCase(claimCaseRequest);
@@ -155,6 +164,7 @@ public class ProcessMakerClient3 implements PmosClient3 {
 
 	@Override
 	public void close() throws Exception {
+		disconnectRestApi();
 		if (client != null) {
 			disconnect();
 		}
@@ -162,7 +172,7 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public void connect(String username, String password) throws ProcessMakerClient3Exception {
+	public void connect() throws ProcessMakerClient3Exception {
 		if (client == null) {
 			try {
 				client = new ProcessMakerServiceStub(soapEndpoint);
@@ -181,7 +191,17 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public CreateDepartmentResponse createDepartment(CreateDepartmentRequest createDepartmentRequest)
+	public void connectRestApi(final String applicationId, final String applicationSecret, final AccessScope scope) {
+		try {
+			processMakerRestClient = new ProcessMakerRestClient(serverBaseUrl, workspace, applicationId,
+					applicationSecret, scope, username, password);
+		} catch (final IOException e) {
+			logger.severe(LogHelper.stackTraceToString(e));
+		}
+	}
+
+	@Override
+	public CreateDepartmentResponse createDepartment(final CreateDepartmentRequest createDepartmentRequest)
 			throws RemoteException {
 		checkClient();
 		createDepartmentRequest.setSessionId(sessionId);
@@ -189,28 +209,29 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public CreateGroupResponse createGroup(CreateGroupRequest createGroupRequest) throws RemoteException {
+	public CreateGroupResponse createGroup(final CreateGroupRequest createGroupRequest) throws RemoteException {
 		checkClient();
 		createGroupRequest.setSessionId(sessionId);
 		return client.createGroup(createGroupRequest);
 	}
 
 	@Override
-	public CreateUserResponse createUser(CreateUserRequest createUserRequest) throws RemoteException {
+	public CreateUserResponse createUser(final CreateUserRequest createUserRequest) throws RemoteException {
 		checkClient();
 		createUserRequest.setSessionId(sessionId);
 		return client.createUser(createUserRequest);
 	}
 
 	@Override
-	public DeleteCaseResponse deleteCase(DeleteCaseRequest deleteCaseRequest) throws RemoteException {
+	public DeleteCaseResponse deleteCase(final DeleteCaseRequest deleteCaseRequest) throws RemoteException {
 		checkClient();
 		deleteCaseRequest.setSessionId(sessionId);
 		return client.deleteCase(deleteCaseRequest);
 	}
 
 	@Override
-	public DepartmentListResponse departmentList(DepartmentListRequest departmentListRequest) throws RemoteException {
+	public DepartmentListResponse departmentList(final DepartmentListRequest departmentListRequest)
+			throws RemoteException {
 		checkClient();
 		departmentListRequest.setSessionId(sessionId);
 		return client.departmentList(departmentListRequest);
@@ -231,29 +252,64 @@ public class ProcessMakerClient3 implements PmosClient3 {
 		}
 	}
 
+	public void disconnectRestApi() {
+		processMakerRestClient = null;
+
+	}
+
 	@Override
-	public PmResponse executeTrigger(ExecuteTriggerRequest executeTriggerRequest) throws RemoteException {
+	public PmResponse executeTrigger(final ExecuteTriggerRequest executeTriggerRequest) throws RemoteException {
 		checkClient();
 		executeTriggerRequest.setSessionId(sessionId);
 		return client.executeTrigger(executeTriggerRequest);
 	}
 
 	@Override
-	public GetCaseInfoResponse getCaseInfo(GetCaseInfoRequest getCaseInfoRequest) throws RemoteException {
+	public GetCaseInfoResponse getCaseInfo(final GetCaseInfoRequest getCaseInfoRequest) throws RemoteException {
 		checkClient();
 		getCaseInfoRequest.setSessionId(sessionId);
 		return client.getCaseInfo(getCaseInfoRequest);
 	}
 
 	@Override
-	public GetCaseNotesResponse getCaseNotes(GetCaseNotesRequest getCaseNotesRequest) throws RemoteException {
+	public GetCaseNotesResponse getCaseNotes(final GetCaseNotesRequest getCaseNotesRequest) throws RemoteException {
 		checkClient();
 		getCaseNotesRequest.setSessionId(sessionId);
 		return client.getCaseNotes(getCaseNotesRequest);
 	}
 
-	public String getSoapEndpoint() {
-		return soapEndpoint;
+	@Override
+	public JSONObject getDynaform(final String projectUid, final String dynaformUid)
+			throws ProcessMakerClient3Exception {
+		try {
+			checkRestClient();
+			return processMakerRestClient.getDynaform(projectUid, dynaformUid);
+		} catch (ParseException | IOException e) {
+			logger.severe(LogHelper.stackTraceToString(e));
+			throw new ProcessMakerClient3Exception(e);
+		}
+	}
+
+	@Override
+	public JSONArray getDynaforms(final String projectUid) throws ProcessMakerClient3Exception {
+		try {
+			checkRestClient();
+			return processMakerRestClient.getDynaforms(projectUid);
+		} catch (ParseException | IOException e) {
+			logger.severe(LogHelper.stackTraceToString(e));
+			throw new ProcessMakerClient3Exception(e);
+		}
+	}
+
+	@Override
+	public String getProcessAsXml(final String projectUid) throws ProcessMakerClient3Exception {
+		try {
+			checkRestClient();
+			return processMakerRestClient.getProcessAsXml(projectUid);
+		} catch (ParseException | IOException e) {
+			logger.severe(LogHelper.stackTraceToString(e));
+			throw new ProcessMakerClient3Exception(e);
+		}
 	}
 
 	@Override
@@ -266,15 +322,24 @@ public class ProcessMakerClient3 implements PmosClient3 {
 		return sessionId;
 	}
 
+	public String getSoapEndpoint() {
+		return soapEndpoint;
+	}
+
 	@Override
-	public GetVariablesResponse getVariables(GetVariablesRequest getVariablesRequest) throws RemoteException {
+	public String getUsername() {
+		return username;
+	}
+
+	@Override
+	public GetVariablesResponse getVariables(final GetVariablesRequest getVariablesRequest) throws RemoteException {
 		checkClient();
 		getVariablesRequest.setSessionId(sessionId);
 		return client.getVariables(getVariablesRequest);
 	}
 
 	@Override
-	public GetVariablesNamesResponse getVariablesNames(GetVariablesNamesRequest getVariablesNamesRequest)
+	public GetVariablesNamesResponse getVariablesNames(final GetVariablesNamesRequest getVariablesNamesRequest)
 			throws RemoteException {
 		checkClient();
 		getVariablesNamesRequest.setSessionId(sessionId);
@@ -287,14 +352,14 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public GroupListResponse groupList(GroupListRequest groupListRequest) throws RemoteException {
+	public GroupListResponse groupList(final GroupListRequest groupListRequest) throws RemoteException {
 		checkClient();
 		groupListRequest.setSessionId(sessionId);
 		return client.groupList(groupListRequest);
 	}
 
 	@Override
-	public InformationUserResponse informationUser(InformationUserRequest informationUserRequest)
+	public InformationUserResponse informationUser(final InformationUserRequest informationUserRequest)
 			throws RemoteException {
 		checkClient();
 		informationUserRequest.setSessionId(sessionId);
@@ -302,7 +367,7 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public InputDocumentListResponse inputDocumentList(InputDocumentListRequest inputDocumentListRequest)
+	public InputDocumentListResponse inputDocumentList(final InputDocumentListRequest inputDocumentListRequest)
 			throws RemoteException {
 		checkClient();
 		inputDocumentListRequest.setSessionId(sessionId);
@@ -311,25 +376,21 @@ public class ProcessMakerClient3 implements PmosClient3 {
 
 	@Override
 	public InputDocumentProcessListResponse inputDocumentProcessList(
-			InputDocumentProcessListRequest inputDocumentProcessListRequest) throws RemoteException {
+			final InputDocumentProcessListRequest inputDocumentProcessListRequest) throws RemoteException {
 		checkClient();
 		inputDocumentProcessListRequest.setSessionId(sessionId);
 		return client.inputDocumentProcessList(inputDocumentProcessListRequest);
 	}
 
-	private LoginResponse login(Login login) throws RemoteException {
-		return client.login(login);
-	}
-
 	@Override
-	public NewCaseResponse newCase(NewCaseRequest newCaseRequest) throws RemoteException {
+	public NewCaseResponse newCase(final NewCaseRequest newCaseRequest) throws RemoteException {
 		checkClient();
 		newCaseRequest.setSessionId(sessionId);
 		return client.newCase(newCaseRequest);
 	}
 
 	@Override
-	public NewCaseImpersonateResponse newCaseImpersonate(NewCaseImpersonateRequest newCaseImpersonateRequest)
+	public NewCaseImpersonateResponse newCaseImpersonate(final NewCaseImpersonateRequest newCaseImpersonateRequest)
 			throws RemoteException {
 		checkClient();
 		newCaseImpersonateRequest.setSessionId(sessionId);
@@ -337,7 +398,7 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public OutputDocumentListResponse outputDocumentList(OutputDocumentListRequest outputDocumentListRequest)
+	public OutputDocumentListResponse outputDocumentList(final OutputDocumentListRequest outputDocumentListRequest)
 			throws RemoteException {
 		checkClient();
 		outputDocumentListRequest.setSessionId(sessionId);
@@ -345,35 +406,36 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public PauseCaseResponse pauseCase(PauseCaseRequest pauseCaseRequest) throws RemoteException {
+	public PauseCaseResponse pauseCase(final PauseCaseRequest pauseCaseRequest) throws RemoteException {
 		checkClient();
 		pauseCaseRequest.setSessionId(sessionId);
 		return client.pauseCase(pauseCaseRequest);
 	}
 
 	@Override
-	public ProcessListResponse processList(ProcessListRequest processListRequest) throws RemoteException {
+	public ProcessListResponse processList(final ProcessListRequest processListRequest) throws RemoteException {
 		checkClient();
 		processListRequest.setSessionId(sessionId);
 		return client.processList(processListRequest);
 	}
 
 	@Override
-	public PmResponse reassignCase(ReassignCaseRequest reassignCaseRequest) throws RemoteException {
+	public PmResponse reassignCase(final ReassignCaseRequest reassignCaseRequest) throws RemoteException {
 		checkClient();
 		reassignCaseRequest.setSessionId(sessionId);
 		return client.reassignCase(reassignCaseRequest);
 	}
 
 	@Override
-	public RemoveDocumentResponse removeDocument(RemoveDocumentRequest removeDocumentRequest) throws RemoteException {
+	public RemoveDocumentResponse removeDocument(final RemoveDocumentRequest removeDocumentRequest)
+			throws RemoteException {
 		checkClient();
 		removeDocumentRequest.setSessionId(sessionId);
 		return client.removeDocument(removeDocumentRequest);
 	}
 
 	@Override
-	public PmResponse removeUserFromGroup(RemoveUserFromGroupRequest removeUserFromGroupRequest)
+	public PmResponse removeUserFromGroup(final RemoveUserFromGroupRequest removeUserFromGroupRequest)
 			throws RemoteException {
 		checkClient();
 		removeUserFromGroupRequest.setSessionId(sessionId);
@@ -381,56 +443,56 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public RoleListResponse roleList(RoleListRequest roleListRequest) throws RemoteException {
+	public RoleListResponse roleList(final RoleListRequest roleListRequest) throws RemoteException {
 		checkClient();
 		roleListRequest.setSessionId(sessionId);
 		return client.roleList(roleListRequest);
 	}
 
 	@Override
-	public RouteCaseResponse routeCase(RouteCaseRequest routeCaseRequest) throws RemoteException {
+	public RouteCaseResponse routeCase(final RouteCaseRequest routeCaseRequest) throws RemoteException {
 		checkClient();
 		routeCaseRequest.setSessionId(sessionId);
 		return client.routeCase(routeCaseRequest);
 	}
 
 	@Override
-	public PmResponse sendMessage(SendMessageRequest sendMessageRequest) throws RemoteException {
+	public PmResponse sendMessage(final SendMessageRequest sendMessageRequest) throws RemoteException {
 		checkClient();
 		sendMessageRequest.setSessionId(sessionId);
 		return client.sendMessage(sendMessageRequest);
 	}
 
 	@Override
-	public PmResponse sendVariables(SendVariablesRequest sendVariablesRequest) throws RemoteException {
+	public PmResponse sendVariables(final SendVariablesRequest sendVariablesRequest) throws RemoteException {
 		checkClient();
 		sendVariablesRequest.setSessionId(sessionId);
 		return client.sendVariables(sendVariablesRequest);
 	}
 
 	@Override
-	public TaskCaseResponse taskCase(TaskCaseRequest taskCaseRequest) throws RemoteException {
+	public TaskCaseResponse taskCase(final TaskCaseRequest taskCaseRequest) throws RemoteException {
 		checkClient();
 		taskCaseRequest.setSessionId(sessionId);
 		return client.taskCase(taskCaseRequest);
 	}
 
 	@Override
-	public TaskListResponse taskList(TaskListRequest taskListRequest) throws RemoteException {
+	public TaskListResponse taskList(final TaskListRequest taskListRequest) throws RemoteException {
 		checkClient();
 		taskListRequest.setSessionId(sessionId);
 		return client.taskList(taskListRequest);
 	}
 
 	@Override
-	public TriggerListResponse triggerList(TriggerListRequest triggerListRequest) throws RemoteException {
+	public TriggerListResponse triggerList(final TriggerListRequest triggerListRequest) throws RemoteException {
 		checkClient();
 		triggerListRequest.setSessionId(sessionId);
 		return client.triggerList(triggerListRequest);
 	}
 
 	@Override
-	public UnassignedCaseListResponse unassignedCaseList(UnassignedCaseListRequest unassignedCaseListRequest)
+	public UnassignedCaseListResponse unassignedCaseList(final UnassignedCaseListRequest unassignedCaseListRequest)
 			throws RemoteException {
 		checkClient();
 		unassignedCaseListRequest.setSessionId(sessionId);
@@ -438,24 +500,40 @@ public class ProcessMakerClient3 implements PmosClient3 {
 	}
 
 	@Override
-	public UnpauseCaseResponse unpauseCase(UnpauseCaseRequest unpauseCaseRequest) throws RemoteException {
+	public UnpauseCaseResponse unpauseCase(final UnpauseCaseRequest unpauseCaseRequest) throws RemoteException {
 		checkClient();
 		unpauseCaseRequest.setSessionId(sessionId);
 		return client.unpauseCase(unpauseCaseRequest);
 	}
 
 	@Override
-	public UpdateUserResponse updateUser(UpdateUserRequest updateUserRequest) throws RemoteException {
+	public UpdateUserResponse updateUser(final UpdateUserRequest updateUserRequest) throws RemoteException {
 		checkClient();
 		updateUserRequest.setSessionId(sessionId);
 		return client.updateUser(updateUserRequest);
 	}
 
 	@Override
-	public UserListResponse userList(UserListRequest userListRequest) throws RemoteException {
+	public UserListResponse userList(final UserListRequest userListRequest) throws RemoteException {
 		checkClient();
 		userListRequest.setSessionId(sessionId);
 		return client.userList(userListRequest);
+	}
+
+	private void checkClient() throws RemoteException {
+		if (client == null || sessionId == null) {
+			throw new RemoteException("client disconnected");
+		}
+	}
+
+	private void checkRestClient() throws RemoteException {
+		if (processMakerRestClient == null || !processMakerRestClient.isValid()) {
+			throw new RemoteException("rest client disconnected");
+		}
+	}
+
+	private LoginResponse login(final Login login) throws RemoteException {
+		return client.login(login);
 	}
 
 }
